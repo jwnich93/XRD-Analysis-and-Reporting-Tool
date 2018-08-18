@@ -4,6 +4,10 @@ See the Wiki for ongoing updates and documentation as this tool evolves.
 
 Project Mission: 
 
+Serve as a tool and conduit for referencing, data processing workflow, and documentation for a high quality research publication.
+
+Combine open source Python packages and apply them to real world data analysis.
+
 Provide researchers of x ray diffraction a set of tools in the Python and Jupyter Lab ecosystem, to enable reproducible transparent high quality research and 360 degree visibility on the data.  
 
 Build models that allow for speed and agility for the researcher to analyze the data.
