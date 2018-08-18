@@ -13,9 +13,13 @@ Produce publication quality graphics that are scalabe, repeatable, and dynamic.
 1 Github repository to host a research project:
 
 a. Data Gathering at Laboratory
+
 b. Data Munging
+
 c. Query and Reporting
+
 d. Insights and Findings
+
 e. Publication quality tables, graphs, etc.
 
 
@@ -26,4 +30,5 @@ Wiki Home : https://github.com/jwnich93/XRD-Analysis-and-Reporting-Tool/wiki
 Project Core Components : https://github.com/jwnich93/XRD-Analysis-and-Reporting-Tool/projects 
 
 Data Munging : https://github.com/jwnich93/XRD-Analysis-and-Reporting-Tool/projects/1 
+
 Query and Reporting : https://github.com/jwnich93/XRD-Analysis-and-Reporting-Tool/projects/2 
