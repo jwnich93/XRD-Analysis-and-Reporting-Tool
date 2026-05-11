@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html,
+  body,
+  #root {
+    height: 100%;
+  }
+
+  body {
+    @apply bg-cream font-sans text-slate-800 antialiased;
+  }
+}
+
+/* AG Grid overrides to match cream/navy theme */
+.ag-theme-alpine {
+  --ag-background-color: #ffffff;
+  --ag-header-background-color: #f5efe6;
+  --ag-header-foreground-color: #1e293b;
+  --ag-border-color: #e8dfd0;
+  --ag-row-hover-color: #fdfaf6;
+  --ag-selected-row-background-color: #eff6ff;
+  --ag-font-family: "Inter", system-ui, sans-serif;
+  --ag-font-size: 13px;
+  --ag-cell-horizontal-padding: 16px;
+}

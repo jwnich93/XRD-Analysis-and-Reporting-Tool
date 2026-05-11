@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: xrd-backend
+  namespace: xrd-platform
+  labels:
+    app: xrd-backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: xrd-backend
+  template:
+    metadata:
+      labels:
+        app: xrd-backend
+    spec:
+      serviceAccountName: xrd-backend-ksa
+      containers:
+        - name: backend
+          image: REGION-docker.pkg.dev/PROJECT_ID/xrd/backend:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            requests:
+              cpu: "250m"
+              memory: "256Mi"
+            limits:
+              cpu: "1"
+              memory: "512Mi"
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: xrd-secrets
+                  key: database-url
+            - name: GCP_PROJECT
+              value: "PROJECT_ID"
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 10
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+
+        # Cloud SQL Auth Proxy sidecar
+        - name: cloud-sql-proxy
+          image: gcr.io/cloud-sql-connectors/cloud-sql-proxy:2.11
+          args:
+            - "--structured-logs"
+            - "--port=5432"
+            - "PROJECT_ID:REGION:xrd-postgres"
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "250m"
+              memory: "128Mi"
+          securityContext:
+            runAsNonRoot: true

@@ -1,0 +1,35 @@
+apiVersion: serving.knative.dev/v1
+kind: Service
+metadata:
+  name: xrd-backend
+  annotations:
+    run.googleapis.com/ingress: all
+spec:
+  template:
+    metadata:
+      annotations:
+        # Cloud SQL Auth Proxy sidecar
+        run.googleapis.com/cloudsql-instances: "PROJECT_ID:REGION:xrd-postgres"
+        autoscaling.knative.dev/minScale: "0"
+        autoscaling.knative.dev/maxScale: "10"
+        run.googleapis.com/execution-environment: gen2
+    spec:
+      serviceAccountName: xrd-backend-sa@PROJECT_ID.iam.gserviceaccount.com
+      containers:
+        - image: REGION-docker.pkg.dev/PROJECT_ID/xrd/backend:latest
+          ports:
+            - containerPort: 8000
+          resources:
+            limits:
+              cpu: "1"
+              memory: 512Mi
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: xrd-db-url
+                  key: latest
+            - name: CORS_ORIGINS
+              value: "https://xrd-frontend-HASH-uc.a.run.app"
+            - name: GCP_PROJECT
+              value: "PROJECT_ID"
