@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>XRD Analysis Platform — Preview</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --cream:        #F5EFE6;
+    --cream-100:    #F5EFE6;
+    --cream-200:    #EBD9C4;
+    --cream-border: #E8DFD0;
+    --navy:         #0D1B3E;
+    --navy-light:   #162347;
+    --accent:       #1D4ED8;
+    --accent-light: #3B82F6;
+    --card:         #FFFFFF;
+    --text:         #1E293B;
+    --muted:        #64748B;
+    --green:        #059669;
+    --amber:        #D97706;
+    --red:          #DC2626;
+  }
+
+  html, body { height: 100%; font-family: 'Inter', system-ui, sans-serif; background: var(--cream); color: var(--text); font-size: 14px; }
+
+  /* ── Layout ────────────────────────────────────────────────── */
+  .shell        { display: flex; flex-direction: column; height: 100vh; }
+  .body-row     { display: flex; flex: 1; overflow: hidden; }
+  main          { flex: 1; overflow-y: auto; background: var(--cream); padding: 24px; }
+
+  /* ── Top Banner ─────────────────────────────────────────────── */
+  header {
+    height: 56px; background: var(--navy);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 24px; box-shadow: 0 2px 8px rgba(0,0,0,.3); flex-shrink: 0;
+  }
+  .brand       { display: flex; align-items: center; gap: 10px; }
+  .brand-icon  {
+    width: 32px; height: 32px; border-radius: 6px;
+    background: rgba(29,78,216,.7);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .brand-icon svg { width: 18px; height: 18px; stroke: #fff; fill: none; stroke-width: 2; }
+  .brand-name  { color: #fff; font-size: 13px; font-weight: 600; letter-spacing: .4px; }
+
+  .top-nav     { display: flex; gap: 4px; }
+  .top-nav a   {
+    padding: 6px 12px; border-radius: 6px; font-size: 13px; font-weight: 500;
+    color: rgba(255,255,255,.6); text-decoration: none; cursor: pointer; transition: all .15s;
+  }
+  .top-nav a:hover   { background: rgba(255,255,255,.08); color: #fff; }
+  .top-nav a.active  { background: rgba(255,255,255,.12); color: #fff; }
+
+  .user-chip   { display: flex; align-items: center; gap: 8px; }
+  .avatar      {
+    width: 30px; height: 30px; border-radius: 50%;
+    background: rgba(29,78,216,.65); color: #fff;
+    font-size: 11px; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .user-label  { color: rgba(255,255,255,.6); font-size: 12px; }
+
+  /* ── Sidebar ─────────────────────────────────────────────────── */
+  aside {
+    width: 200px; background: #fff;
+    border-right: 1px solid var(--cream-border);
+    display: flex; flex-direction: column;
+    padding: 12px 8px; flex-shrink: 0;
+  }
+  .sidebar-link {
+    display: flex; align-items: center; gap: 10px;
+    padding: 8px 12px; border-radius: 6px;
+    font-size: 13px; font-weight: 500;
+    color: var(--muted); cursor: pointer; transition: all .15s;
+    margin-bottom: 2px;
+  }
+  .sidebar-link svg  { width: 15px; height: 15px; stroke: currentColor; fill: none; stroke-width: 2; flex-shrink: 0; }
+  .sidebar-link:hover { background: var(--cream-100); color: var(--text); }
+  .sidebar-link.active { background: var(--navy); color: #fff; }
+
+  /* ── Page header ─────────────────────────────────────────────── */
+  .page-title  { font-size: 18px; font-weight: 700; color: var(--text); margin-bottom: 20px; }
+
+  /* ── Stat cards ──────────────────────────────────────────────── */
+  .stat-grid   { display: grid; grid-template-columns: repeat(4,1fr); gap: 16px; margin-bottom: 20px; }
+  .stat-card   {
+    background: var(--card); border: 1px solid var(--cream-border);
+    border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    display: flex; justify-content: space-between; align-items: flex-start;
+  }
+  .stat-label  { font-size: 10px; font-weight: 600; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .stat-value  { font-size: 26px; font-weight: 700; color: var(--text); margin: 4px 0; }
+  .stat-delta  { font-size: 11px; font-weight: 600; color: var(--green); }
+  .stat-icon   {
+    width: 38px; height: 38px; border-radius: 8px;
+    background: rgba(13,27,62,.06);
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .stat-icon svg { width: 18px; height: 18px; stroke: var(--navy); fill: none; stroke-width: 2; }
+
+  /* ── Cards ───────────────────────────────────────────────────── */
+  .card {
+    background: var(--card); border: 1px solid var(--cream-border);
+    border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.05);
+    overflow: hidden;
+  }
+  .card-header {
+    padding: 12px 20px; border-bottom: 1px solid var(--cream-border);
+    display: flex; align-items: center; justify-content: space-between;
+  }
+  .card-title  { font-size: 13px; font-weight: 600; color: var(--text); }
+  .card-body   { padding: 16px 20px; }
+
+  .grid-2col   { display: grid; grid-template-columns: 1fr 2fr; gap: 16px; margin-bottom: 20px; }
+  .grid-full   { margin-bottom: 20px; }
+
+  /* ── Mini chart ──────────────────────────────────────────────── */
+  .chart-wrap  { height: 200px; position: relative; }
+  svg.chart    { width: 100%; height: 100%; }
+
+  /* ── AG Grid style table ─────────────────────────────────────── */
+  .ag-wrap     { border: 1px solid var(--cream-border); border-radius: 8px; overflow: hidden; }
+  table        { width: 100%; border-collapse: collapse; font-size: 13px; }
+  thead th     {
+    background: var(--cream-100); color: var(--text); font-weight: 600;
+    padding: 10px 16px; text-align: left;
+    border-bottom: 1px solid var(--cream-border);
+    font-size: 12px; letter-spacing: .2px;
+  }
+  tbody tr     { border-bottom: 1px solid var(--cream-border); transition: background .1s; }
+  tbody tr:last-child { border-bottom: none; }
+  tbody tr:hover { background: #fdfaf6; }
+  tbody td     { padding: 10px 16px; color: var(--text); }
+
+  /* ── Badges ──────────────────────────────────────────────────── */
+  .badge       { display: inline-flex; align-items: center; border-radius: 9999px; padding: 2px 10px; font-size: 11px; font-weight: 600; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-amber { background: #fef3c7; color: #92400e; }
+  .badge-red   { background: #fee2e2; color: #991b1b; }
+  .badge-blue  { background: #dbeafe; color: #1e40af; }
+
+  /* ── Buttons ─────────────────────────────────────────────────── */
+  .btn         {
+    display: inline-flex; align-items: center; gap: 6px;
+    border-radius: 6px; font-size: 12px; font-weight: 600;
+    padding: 6px 14px; cursor: pointer; border: none; transition: all .15s;
+  }
+  .btn-primary { background: var(--navy); color: #fff; }
+  .btn-primary:hover { background: var(--navy-light); }
+  .btn-outline { background: #fff; color: var(--text); border: 1px solid var(--cream-border); }
+  .btn-outline:hover { background: var(--cream-100); }
+
+  /* ── Page tabs ───────────────────────────────────────────────── */
+  .pages { display: none; }
+  .pages.active { display: block; }
+
+  /* ── Upload card ─────────────────────────────────────────────── */
+  .form-label  { font-size: 11px; font-weight: 600; color: var(--muted); margin-bottom: 4px; display: block; }
+  .form-input  {
+    width: 100%; border: 1px solid var(--cream-border); border-radius: 6px;
+    padding: 8px 12px; font-size: 13px; background: var(--cream-100);
+    color: var(--text); outline: none; font-family: inherit;
+  }
+  .form-input:focus { border-color: var(--accent-light); box-shadow: 0 0 0 2px rgba(59,130,246,.2); }
+  .form-row    { margin-bottom: 12px; }
+  select.form-input { cursor: pointer; }
+
+  /* ── Sparkline path ──────────────────────────────────────────── */
+  .chart-line  { fill: none; stroke: var(--navy); stroke-width: 2.5; stroke-linejoin: round; }
+  .chart-area  { fill: url(#grad); opacity: .15; }
+  .chart-grid  { stroke: var(--cream-border); stroke-width: 1; }
+  .chart-dot   { fill: var(--navy); }
+</style>
+</head>
+<body>
+
+<div class="shell">
+
+  <!-- ── TOP BANNER ────────────────────────────────────────────── -->
+  <header>
+    <div class="brand">
+      <div class="brand-icon">
+        <svg viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg>
+      </div>
+      <span class="brand-name">XRD Platform</span>
+    </div>
+
+    <nav class="top-nav">
+      <a class="active" onclick="showPage('dashboard',this)">Dashboard</a>
+      <a onclick="showPage('analysis',this)">Analysis</a>
+      <a onclick="showPage('reports',this)">Reports</a>
+    </nav>
+
+    <div class="user-chip">
+      <div class="avatar">R</div>
+      <span class="user-label">Researcher</span>
+    </div>
+  </header>
+
+  <div class="body-row">
+
+    <!-- ── SIDEBAR ──────────────────────────────────────────────── -->
+    <aside>
+      <div class="sidebar-link active" id="sl-dashboard" onclick="showPage('dashboard')">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/></svg>
+        Dashboard
+      </div>
+      <div class="sidebar-link" id="sl-analysis" onclick="showPage('analysis')">
+        <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+        Analysis
+      </div>
+      <div class="sidebar-link" id="sl-reports" onclick="showPage('reports')">
+        <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+        Reports
+      </div>
+    </aside>
+
+    <!-- ── MAIN ─────────────────────────────────────────────────── -->
+    <main>
+
+      <!-- ══ DASHBOARD PAGE ══════════════════════════════════════ -->
+      <div id="page-dashboard" class="pages active">
+        <p class="page-title">Dashboard</p>
+
+        <!-- Stat row -->
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Total Samples</div>
+              <div class="stat-value">24</div>
+              <div class="stat-delta">▲ 4 this month</div>
+            </div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Analyses Run</div>
+              <div class="stat-value">138</div>
+              <div class="stat-delta">▲ 22 this month</div>
+            </div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m19 9-5 5-4-4-3 3"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Complete</div>
+              <div class="stat-value">121</div>
+              <div class="stat-delta" style="color:var(--green)">▲ 87.7%</div>
+            </div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></svg>
+            </div>
+          </div>
+          <div class="stat-card">
+            <div>
+              <div class="stat-label">Reports</div>
+              <div class="stat-value">47</div>
+              <div class="stat-delta">▲ 8 this month</div>
+            </div>
+            <div class="stat-icon">
+              <svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid-2col">
+          <!-- Line chart -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Analyses Over Time</span></div>
+            <div class="card-body">
+              <div class="chart-wrap">
+                <svg class="chart" viewBox="0 0 320 180" preserveAspectRatio="none">
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stop-color="#0D1B3E"/>
+                      <stop offset="100%" stop-color="#0D1B3E" stop-opacity="0"/>
+                    </linearGradient>
+                  </defs>
+                  <!-- grid lines -->
+                  <line class="chart-grid" x1="0" y1="36" x2="320" y2="36"/>
+                  <line class="chart-grid" x1="0" y1="72" x2="320" y2="72"/>
+                  <line class="chart-grid" x1="0" y1="108" x2="320" y2="108"/>
+                  <line class="chart-grid" x1="0" y1="144" x2="320" y2="144"/>
+                  <!-- area -->
+                  <polygon class="chart-area"
+                    points="0,162 26,148 53,135 80,120 107,100 133,85 160,70 187,58 213,48 240,38 267,30 293,24 320,18 320,180 0,180"/>
+                  <!-- line -->
+                  <polyline class="chart-line"
+                    points="0,162 26,148 53,135 80,120 107,100 133,85 160,70 187,58 213,48 240,38 267,30 293,24 320,18"/>
+                  <!-- dots -->
+                  <circle class="chart-dot" cx="0"   cy="162" r="3"/>
+                  <circle class="chart-dot" cx="80"  cy="120" r="3"/>
+                  <circle class="chart-dot" cx="160" cy="70"  r="3"/>
+                  <circle class="chart-dot" cx="240" cy="38"  r="3"/>
+                  <circle class="chart-dot" cx="320" cy="18"  r="3"/>
+                  <!-- x labels -->
+                  <text x="0"   y="178" font-size="9" fill="#94a3b8">Jan</text>
+                  <text x="74"  y="178" font-size="9" fill="#94a3b8">Mar</text>
+                  <text x="154" y="178" font-size="9" fill="#94a3b8">May</text>
+                  <text x="234" y="178" font-size="9" fill="#94a3b8">Jul</text>
+                  <text x="308" y="178" font-size="9" fill="#94a3b8">Sep</text>
+                </svg>
+              </div>
+            </div>
+          </div>
+
+          <!-- AG Grid style table -->
+          <div class="card">
+            <div class="card-header">
+              <span class="card-title">Recent Analyses</span>
+              <span style="font-size:11px;color:var(--muted)">138 total</span>
+            </div>
+            <div class="card-body" style="padding:0">
+              <div class="ag-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Analysis</th>
+                      <th>Status</th>
+                      <th>λ (Å)</th>
+                      <th>Created</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr><td>Fe₂O₃ — Run 07</td><td><span class="badge badge-green">complete</span></td><td>1.5406</td><td>May 10, 2026</td></tr>
+                    <tr><td>TiO₂ Anatase — Run 03</td><td><span class="badge badge-green">complete</span></td><td>1.5406</td><td>May 9, 2026</td></tr>
+                    <tr><td>ZnO Nanocrystal — Run 11</td><td><span class="badge badge-amber">pending</span></td><td>0.7093</td><td>May 9, 2026</td></tr>
+                    <tr><td>Cu Powder — Run 02</td><td><span class="badge badge-green">complete</span></td><td>1.5406</td><td>May 8, 2026</td></tr>
+                    <tr><td>Al₂O₃ Corundum</td><td><span class="badge badge-red">error</span></td><td>—</td><td>May 7, 2026</td></tr>
+                    <tr><td>SiO₂ Quartz — Run 05</td><td><span class="badge badge-green">complete</span></td><td>1.5406</td><td>May 7, 2026</td></tr>
+                    <tr><td>NiO — Run 04</td><td><span class="badge badge-green">complete</span></td><td>1.5406</td><td>May 6, 2026</td></tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- AG Grid pagination bar -->
+              <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 12px;gap:12px;border-top:1px solid var(--cream-border);font-size:11px;color:var(--muted)">
+                <span>Page 1 of 7</span>
+                <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">‹ Prev</button>
+                <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">Next ›</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ ANALYSIS PAGE ════════════════════════════════════════ -->
+      <div id="page-analysis" class="pages">
+        <p class="page-title">XRD Analysis</p>
+
+        <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-bottom:20px">
+          <!-- New analysis form -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">New Analysis</span></div>
+            <div class="card-body">
+              <div class="form-row">
+                <label class="form-label">Sample Name</label>
+                <input class="form-input" type="text" placeholder="e.g. Iron Oxide" />
+              </div>
+              <div class="form-row">
+                <label class="form-label">Analysis Name</label>
+                <input class="form-input" type="text" placeholder="e.g. Run 01 — Cu Kα" />
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center">Create Analysis</button>
+            </div>
+          </div>
+
+          <!-- Upload -->
+          <div class="card">
+            <div class="card-header"><span class="card-title">Upload XRD Data</span></div>
+            <div class="card-body">
+              <p style="font-size:12px;color:var(--muted);margin-bottom:12px">
+                Selected: <strong style="color:var(--navy)">Fe₂O₃ — Run 07</strong>
+              </p>
+              <!-- Drop zone -->
+              <div style="border:2px dashed var(--cream-border);border-radius:8px;padding:28px;text-align:center;margin-bottom:12px;cursor:pointer;transition:background .15s" onmouseover="this.style.background='#fdfaf6'" onmouseout="this.style.background=''">
+                <svg style="width:32px;height:32px;stroke:var(--muted);fill:none;stroke-width:1.5;margin:0 auto 8px" viewBox="0 0 24 24"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <p style="font-size:12px;color:var(--muted)">Drop <code>.csv</code> / <code>.txt</code> / <code>.xy</code> here</p>
+                <p style="font-size:11px;color:var(--cream-200);margin-top:4px">or click to browse</p>
+              </div>
+              <button class="btn btn-primary" style="width:100%;justify-content:center">Upload &amp; Process</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Measurements table -->
+        <div class="card grid-full">
+          <div class="card-header">
+            <span class="card-title">Measurements — Fe₂O₃ Run 07</span>
+            <span style="font-size:11px;color:var(--muted)">2,048 data points</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="ag-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>2θ (°) <span style="color:var(--accent-light)">↕</span></th>
+                    <th>Intensity <span style="color:var(--accent-light)">↕</span></th>
+                    <th>d-spacing (Å) <span style="color:var(--accent-light)">↕</span></th>
+                    <th>Peak Label</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>24.1387</td><td>1 432.7</td><td>3.6852</td><td><span class="badge badge-blue">(012)</span></td></tr>
+                  <tr><td>33.1527</td><td>8 204.3</td><td>2.7018</td><td><span class="badge badge-blue">(104)</span></td></tr>
+                  <tr><td>35.6112</td><td>9 887.1</td><td>2.5198</td><td><span class="badge badge-blue">(110)</span></td></tr>
+                  <tr><td>40.8554</td><td>2 119.4</td><td>2.2056</td><td>—</td></tr>
+                  <tr><td>49.4801</td><td>5 334.8</td><td>1.8400</td><td><span class="badge badge-blue">(024)</span></td></tr>
+                  <tr><td>54.0883</td><td>3 671.2</td><td>1.6947</td><td><span class="badge badge-blue">(116)</span></td></tr>
+                  <tr><td>57.5901</td><td>2 218.5</td><td>1.5991</td><td>—</td></tr>
+                  <tr><td>62.4491</td><td>4 550.3</td><td>1.4876</td><td><span class="badge badge-blue">(214)</span></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 12px;gap:12px;border-top:1px solid var(--cream-border);font-size:11px;color:var(--muted)">
+              <span>Page 1 of 103</span>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">‹ Prev</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">Next ›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ══ REPORTS PAGE ═════════════════════════════════════════ -->
+      <div id="page-reports" class="pages">
+        <p class="page-title">Reports</p>
+
+        <!-- New report form -->
+        <div class="card" style="margin-bottom:20px">
+          <div class="card-header"><span class="card-title">New Report</span></div>
+          <div class="card-body">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:12px;align-items:end">
+              <div>
+                <label class="form-label">Analysis</label>
+                <select class="form-input">
+                  <option>Fe₂O₃ — Run 07</option>
+                  <option>TiO₂ Anatase — Run 03</option>
+                  <option>ZnO Nanocrystal — Run 11</option>
+                </select>
+              </div>
+              <div>
+                <label class="form-label">Report Title</label>
+                <input class="form-input" type="text" placeholder="e.g. Phase Analysis — Run 07" />
+              </div>
+              <div>
+                <label class="form-label">Phase Identified</label>
+                <input class="form-input" type="text" placeholder="e.g. α-Fe₂O₃" />
+              </div>
+              <button class="btn btn-primary" style="white-space:nowrap">Save Report</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Reports table -->
+        <div class="card">
+          <div class="card-header">
+            <span class="card-title">All Reports</span>
+            <span style="font-size:11px;color:var(--muted)">47 total</span>
+          </div>
+          <div class="card-body" style="padding:0">
+            <div class="ag-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Title <span style="color:var(--accent-light)">↕</span></th>
+                    <th>Phase</th>
+                    <th>Crystallite (nm)</th>
+                    <th>Created</th>
+                    <th>Export</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr><td>Phase Analysis — Run 07</td><td>α-Fe₂O₃ (Hematite)</td><td>38.4</td><td>May 10, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>TiO₂ Crystallinity Study</td><td>Anatase</td><td>12.7</td><td>May 9, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>ZnO Wurtzite Confirm</td><td>Wurtzite</td><td>55.2</td><td>May 8, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>Cu FCC Lattice Param</td><td>Cu (FCC)</td><td>—</td><td>May 7, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>SiO₂ Amorphous Halo</td><td>Amorphous SiO₂</td><td>—</td><td>May 6, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>NiO Rock Salt Structure</td><td>NiO</td><td>22.1</td><td>May 5, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                  <tr><td>α-Al₂O₃ Corundum</td><td>Corundum</td><td>48.9</td><td>May 4, 2026</td><td><button class="btn btn-outline">CSV</button></td></tr>
+                </tbody>
+              </table>
+            </div>
+            <div style="display:flex;align-items:center;justify-content:flex-end;padding:8px 12px;gap:12px;border-top:1px solid var(--cream-border);font-size:11px;color:var(--muted)">
+              <span>Page 1 of 3</span>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">‹ Prev</button>
+              <button class="btn btn-outline" style="padding:4px 10px;font-size:11px;">Next ›</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<script>
+  function showPage(page, navEl) {
+    document.querySelectorAll('.pages').forEach(p => p.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+
+    document.querySelectorAll('.sidebar-link').forEach(l => l.classList.remove('active'));
+    document.getElementById('sl-' + page).classList.add('active');
+
+    document.querySelectorAll('.top-nav a').forEach(a => a.classList.remove('active'));
+    if (navEl) navEl.classList.add('active');
+    else {
+      document.querySelectorAll('.top-nav a').forEach(a => {
+        if (a.textContent.toLowerCase().includes(page.substring(0,4))) a.classList.add('active');
+      });
+    }
+  }
+</script>
+
+</body>
+</html>
